@@ -174,10 +174,8 @@ class User {
         } else {
             echo '<a href="like_post_action.php?post_id='. $post_id . '"><i class="fi fi-rr-social-network"></i></a>';
         }
-        $_SESSION["post_id"] =  $post_id;
-        echo '<a href="comments.php?post_id='. $post_id . '"><i class="fi fi-rr-comment-alt-dots"></i></a>';
-        
-        
+
+        echo '<a href="#test"><i class="fi fi-rr-comment-alt-dots"></i></a>';
         echo '</div>';
         echo '</div>';
     }
@@ -225,54 +223,6 @@ class User {
         else{
             return false;
         }
-    }
-
-    function post_comment($post_id , $content) {
-        $user_id = $this->id;
-       
-
-        $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
-        
- 
-        $stmt = $this->connection->prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $post_id, $user_id, $content);
-        
-     
-        $stmt->execute();
-        
-        if ($stmt->affected_rows === -1) {
-            die("MySQL query failed!" . mysqli_error($this->connection));
-        }
-        
-      
-        $stmt->close();
-        $this->connection->close();
-
-
-
-    }
-
-    function display_comments($post_id) {
-        $user_id = $this->id;
-
-        $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
-
-        $sql = "SELECT * FROM comments WHERE post_id = '$post_id'";
-        $result = $this->connection->query($sql);
-    
-        while ($row = $result->fetch_assoc()) {
-            $created_at = $row['created_at'];
-            $content = $row['content'];
-            $user_id = $row['user_id']; 
-
-            echo '<div class="content">';
-            echo $content;
-            echo '</div>';
-        }
-    
-
-
-
     }
 
 }

@@ -90,29 +90,34 @@ a {
     </head>
 
     <body>
-<?php  if ($logged_in): ?>
-        <p>
-            <a href="post.php">Create a post</a>
-        </p>
-        <p>
-            <a href="log-out.php">Log out</a>
-            
-        </p>
-<?php  else: ?>
-    <p>
-        <a href="login.php">Log in</a>
-    </p>
 
-    <p>
-        <a href="sign_up.php">Sign up</a>
-    </p>
-
-<?php endif ?>
 <?php
-$user = new User(); 
+$logged_in = false;
+if ( !isset($_SESSION['user'])) {
+    //
+    header('Location: http://localhost/loginSystem/sign_up.php');
+    //
+}
 
-$user->display_posts();
+
+$logged_in = true;
+$user = unserialize($_SESSION['user']);
+if (isset($_GET['post_id'])) {
+    $post_id = $_GET['post_id'];
+    $_SESSION['post_id'] = $post_id;}
+else {
+    $post_id = $_SESSION['post_id'];
+}
+$user->display_comments($post_id);
+
 ?>
+
+<form action="post_comment.php" method="post">
+    <div class="mb-3">
+            <label for="comment" class="form-label">Comment...</label>
+            <input name="comment" type="text" class="form-control" id="comment">
+            <button type="submit">Yes</button>
+        </div>
 
 <div class="navbar">
   <a href="index.html"><i class="fi fi-rr-home"></i></a>
