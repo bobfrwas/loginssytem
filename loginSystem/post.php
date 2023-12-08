@@ -110,11 +110,16 @@ include_once "models/db.php";
               <label for="content">Message</label>
               <input type="text" id="content" name="content" required>
             </div>
+            <div class="form-group">
+            <input type="file" name="fileToUpload" id="fileToUpload">
+            </div>
             <button type="submit">Post</button>
           </form>
           
         </div>
       </div>
+
+ 
     
     
 

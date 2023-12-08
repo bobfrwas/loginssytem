@@ -1,4 +1,11 @@
+<!DOCTYPE html>
+<head>
+<link rel='stylesheet' href="icons/uicons-regular-rounded/css/uicons-regular-rounded.css">
+</head>
+
 <?php
+
+
 
 class User {
     public $name = "";
@@ -8,9 +15,15 @@ class User {
     public $token = "";
     private $connection;
     public $authenticated = false;
+    public $id;
+    public $like_button = "0";
+
+    function __construct() {
+
+    }
 
     // Assume that the email and password are UNSAFE:
-    function __construct($connection, $name, $email, $password) {
+    function sign_up($connection, $name, $email, $password) {
         $this->name  = mysqli_real_escape_string($connection, $name);
         $this->email = mysqli_real_escape_string($connection, $email);
         $this->password = mysqli_real_escape_string($connection, $password);
@@ -59,6 +72,29 @@ class User {
 
     }
 
+    function load($connection, $email, $password) {
+
+        $this->email = mysqli_real_escape_string($connection, $email);
+        $this->password = mysqli_real_escape_string($connection, $password);
+        $this->connection = $connection;
+
+        $sql = "
+        SELECT id, email, password, token, is_active FROM user_login WHERE email=\"{$this->email}\";
+        ";
+
+        $result = $this->connection->query($sql);
+        if ($row = $result->fetch_assoc()) {
+            $this->id = $row["id"];
+            $this->token = $row["token"];
+
+            
+
+            //echo "ID". $this->id;
+            // TODO:
+            // $this->is_active = $row["is_active"] ;
+        }
+    }
+
     function authenticate() {
         $sql = "
         SELECT id, email, password, token, is_active FROM user_login WHERE email=\"{$this->email}\";
@@ -76,26 +112,92 @@ class User {
         return $this->authenticated;
     }
 
-    function post_a_post($title, $content) {
+    function post_a_post($title, $content, $user_id) {
         $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
-        $sql = "
-        INSERT INTO posts (
-            title,
-            content 
-        ) VALUES (
-            '{$title}',
-            '{$content}'
-            
-        )
-        ";
-
-        $sqlQuery = $this->connection->query($sql);
-
-        if (!$sqlQuery) {
+        
+ 
+        $stmt = $this->connection->prepare("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $title, $content, $user_id);
+        
+     
+        $stmt->execute();
+        
+        if ($stmt->affected_rows === -1) {
             die("MySQL query failed!" . mysqli_error($this->connection));
         }
+        
+      
+        $stmt->close();
+        $this->connection->close();
+    }
+
+    function display_posts() {
+        $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
+
+        $sql = "SELECT * FROM posts";
+        
+        $result = $this->connection->query($sql);
+        
+
+        while ($row = $result->fetch_assoc()) {
+            $title = $row['title'];
+            $content = $row['content'];
+            $post_id = $row['id'];
+            
+
+            echo '<div class="post">';
+            echo '<div class="title">';
+            echo $title;
+            echo '</div>';
+            echo '<div class="content">';
+            echo $content;
+            echo '</div>';
+            echo '<div class="buttons">';
+            echo '<a href="like_post_action.php?post_id='. $post_id . '"><i class="fi fi-rr-social-network"></i></a>';
+            echo '<a href="#test"><i class="fi fi-rr-comment-alt-dots"></i></a>';
+            echo '</div>';
+            echo '</div>';
+            // If already liked post '<i class="fi fi-br-social-network"></i>'
+            //IF not liked post ''
+            
+           
+            
+        
+        }
+    }
+
+    function like_a_post($post_id) {
+        $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
+
+        $user_id = $this->id;
+
+        $sql = "SELECT * FROM post_likes WHERE user_id = '$user_id' AND post_id = '$post_id'"; 
+        $sqlQuery = $this->connection->query($sql);
+    
+        if ($sqlQuery && $sqlQuery->num_rows > 0) {
+            $sql = "DELETE FROM post_likes WHERE user_id = '$user_id' AND post_id = '$post_id'";
+            $sqlQuery = $this->connection->query($sql);
+        }
+        else{
+
+        
+        $stmt = $this->connection->prepare("INSERT INTO post_likes (user_id, post_id) VALUES (?, ?)");
+
+        $stmt->bind_param("ii", $user_id, $post_id);
+        
+        $stmt->execute();
+        
+        if ($stmt->affected_rows === -1) {
+            die("MySQL query failed!" . mysqli_error($this->connection));
+        }
+        
+        $stmt->close();
+        $this->connection->close();
+    }
+    }
+
+    function check_if_liked($post_id , $user_id) {
 
     }
 
 }
-?>

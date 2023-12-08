@@ -3,7 +3,8 @@
 include_once 'models/db.php';
 include_once 'models/user.php';
 
-$u = new User($connection, $_POST['name'], $_POST['email'], $_POST['password']);
+$u = new User();
+$u->load($connection, $_POST['email'], $_POST['password']);
 
 $u->authenticate();
 

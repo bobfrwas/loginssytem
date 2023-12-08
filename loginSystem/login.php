@@ -1,5 +1,5 @@
 <div style="padding: 50px; margin-top: 2em">
-    <h1>Sign up</h1>
+    <h1>Log In</h1>
 
     <form action="login_action.php" method="post">
         <div class="mb-3">

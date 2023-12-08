@@ -12,19 +12,19 @@ if( ! isset($_POST["email"])) {
 //if we have data
 var_dump($_POST);
 
-$user = new User($connection, $_POST['name'],$_POST['email'], $_POST["password"]);
+$user = new User();
+$user->sign_up($connection, $_POST['name'],$_POST['email'], $_POST["password"]);
 
 $email_check = $user->user_email_check($_POST['email']);
-if ($email_check === "email_unused"){
-$user->insert();
-header("Location: login.php");}
+if ($email_check == "email_unused"){
 
-
-
+    $user->insert();
+    header("Location: sign_in.php");}
 
 else {
     echo "Email in use";
 }
+
 
 
 
