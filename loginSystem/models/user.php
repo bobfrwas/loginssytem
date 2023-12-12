@@ -48,28 +48,25 @@ class User {
     }
 
     function insert() {
-        $sql = "
-        INSERT INTO user_login (
-            name,
-            email, 
-            password,
-            token,
-            is_active
-        ) VALUES (
-            '{$this->name}',
-            '{$this->email}',
-            '{$this->password_hash}',
-            '{$this->token}',
-            '0'
-        )
-        ";
-
-        $sqlQuery = $this->connection->query($sql);
-
-        if (!$sqlQuery) {
+        $stmt = $this->connection->prepare("
+            INSERT INTO user_login (
+                name,
+                email, 
+                password,
+                token,
+                is_active
+            ) VALUES (?, ?, ?, ?, '0')
+        ");
+    
+        $stmt->bind_param("ssss", $this->name, $this->email, $this->password_hash, $this->token);
+    
+        $stmt->execute();
+    
+        if ($stmt->affected_rows === -1) {
             die("MySQL query failed!" . mysqli_error($this->connection));
         }
-
+    
+        $stmt->close();
     }
 
     function load($connection, $email, $password) {
@@ -112,21 +109,19 @@ class User {
         return $this->authenticated;
     }
 
-    function post_a_post($title, $content, $user_id) {
+    function post_a_post($title, $content, $user_id , $hashtags) {
         $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
         
- 
-        $stmt = $this->connection->prepare("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $title, $content, $user_id);
+        $stmt = $this->connection->prepare("INSERT INTO posts (title, content, user_id , hashtags) VALUES (?, ?, ?, ?)");
+    
+        $stmt->bind_param("ssss", $title, $content, $user_id, $hashtags);
         
-     
         $stmt->execute();
         
         if ($stmt->affected_rows === -1) {
             die("MySQL query failed!" . mysqli_error($this->connection));
         }
-        
-      
+
         $stmt->close();
         $this->connection->close();
     }
@@ -170,12 +165,20 @@ class User {
         $sqlQuery = $this->connection->query($sql);
 
         if ($sqlQuery && $sqlQuery->num_rows > 0) {
+            //if you have liked the post
             echo '<a href="like_post_action.php?post_id='. $post_id . '"><i class="fi fi-br-social-network"></i></a>';
         } else {
             echo '<a href="like_post_action.php?post_id='. $post_id . '"><i class="fi fi-rr-social-network"></i></a>';
         }
         $_SESSION["post_id"] =  $post_id;
-        echo '<a href="comments.php?post_id='. $post_id . '"><i class="fi fi-rr-comment-alt-dots"></i></a>';
+
+        $sql3 = "SELECT COUNT(*) AS c FROM comments WHERE post_id = $post_id";
+        $sqlQuery = $this->connection->query($sql3);
+        $row = $sqlQuery->fetch_assoc();
+        $c = $row['c'];
+
+
+        echo '<a href="comments.php?post_id='. $post_id , $c . '"><i class="fi fi-rr-comment-alt-dots"></i></a>';
         
         
         echo '</div>';
@@ -227,29 +230,23 @@ class User {
         }
     }
 
-    function post_comment($post_id , $content) {
+    function post_comment($post_id, $content) {
         $user_id = $this->id;
-       
-
+    
         $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
         
- 
         $stmt = $this->connection->prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $post_id, $user_id, $content);
+    
+        $stmt->bind_param("iss", $post_id, $user_id, $content);
         
-     
         $stmt->execute();
         
         if ($stmt->affected_rows === -1) {
             die("MySQL query failed!" . mysqli_error($this->connection));
         }
-        
-      
+
         $stmt->close();
         $this->connection->close();
-
-
-
     }
 
     function display_comments($post_id) {
@@ -259,20 +256,99 @@ class User {
 
         $sql = "SELECT * FROM comments WHERE post_id = '$post_id'";
         $result = $this->connection->query($sql);
+       
     
         while ($row = $result->fetch_assoc()) {
             $created_at = $row['created_at'];
             $content = $row['content'];
-            $user_id = $row['user_id']; 
-
+            $user_id = $row['user_id'];
+            echo '<div class="post">';
+            echo '<div class="user">';
+            $sql2 = "SELECT name FROM user_login WHERE id = '$user_id'"; 
+            $result2 = $this->connection->query($sql2);
+        
+        if ($result2 && $result2->num_rows > 0) {
+            $row2 = $result2->fetch_assoc();
+            $user_name = $row2['name'];
+            echo 'Posted by: ' . $user_name . ' at ' . $row['created_at'];
+        } else {
+            echo 'Posted by: Deleted User';
+        }
+            echo '</div>';
             echo '<div class="content">';
             echo $content;
+            echo '</div>';
             echo '</div>';
         }
     
 
 
 
+    }
+
+    function search($search_input) {
+        $user_id = $this->id;
+        $this->connection = new mysqli('localhost', 'root', '', 'loginsystem');
+        
+        // Prepare the SQL statement for searching posts
+        $stmt = $this->connection->prepare("SELECT * FROM posts WHERE title LIKE ?");
+        $search_term = '%' . $search_input . '%';
+        $stmt->bind_param("s", $search_term);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $title = $row['title'];
+                $content = $row['content'];
+    
+                echo '';
+                echo $title;
+                echo $content;
+            }
+        } else {
+            echo "No Posts called " . htmlspecialchars($search_input) . ".";
+        }
+        
+        $stmt2 = $this->connection->prepare("SELECT * FROM user_login WHERE Name LIKE ?");
+        $search_term2 = '%' . $search_input . '%';
+        $stmt2->bind_param("s", $search_term2);
+        $stmt2->execute();
+        $result2 = $stmt2->get_result();
+        
+        if ($result2->num_rows > 0) {
+            while ($row = $result2->fetch_assoc()) {
+                $name = $row['Name'];
+    
+                echo $name;
+            }
+        } else {
+            echo "No People called " . htmlspecialchars($search_input) . ".";
+        }
+
+        $stmt3 = $this->connection->prepare("SELECT * FROM posts WHERE hashtags LIKE ?");
+        $search_term3 = '%' . $search_input . '%';
+        $stmt3->bind_param("s", $search_term2);
+        $stmt3->execute();
+        $result3 = $stmt3->get_result();
+        
+        if ($result3->num_rows > 0) {
+            while ($row = $result3->fetch_assoc()) {
+                $title = $row['title'];
+                $content = $row['content'];
+    
+                echo '';
+                echo $title;
+                echo $content;
+            }
+        } else {
+            echo "No post tagged with " . htmlspecialchars($search_input) . ".";
+        }
+        
+
+        $stmt->close();
+        $stmt2->close();
+        $this->connection->close();
     }
 
 }

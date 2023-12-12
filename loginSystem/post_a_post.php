@@ -20,8 +20,9 @@ $user_id = $user->id;
 
 $title = $_POST['title'];
 $content = $_POST['content'];
+$hashtags = $_POST['hashtags'];
 
 
-$user->post_a_post($title, $content, $user_id);
-header('Location: http://localhost/loginSystem/index.php');
+$user->post_a_post($title, $content, $user_id , $hashtags);
+header('Location: index.php');
 ?>

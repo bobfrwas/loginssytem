@@ -111,6 +111,10 @@ include_once "models/db.php";
               <input type="text" id="content" name="content" required>
             </div>
             <div class="form-group">
+              <label for="hashtags">Type your #here</label>
+              <input type="text" id="hashtags" name="hashtags" required>
+            </div>
+            <div class="form-group">
             <input type="file" name="fileToUpload" id="fileToUpload">
             </div>
             <button type="submit">Post</button>

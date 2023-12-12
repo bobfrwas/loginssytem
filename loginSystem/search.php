@@ -1,5 +1,4 @@
 <?php 
-
 include_once 'models/db.php';
 include_once 'models/user.php';
 
@@ -17,8 +16,8 @@ if (isset($_SESSION['user'])) {
     <head>
     
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
-        <style>
 
+<style>
 
 .navbar {
   background-color: #333;
@@ -59,67 +58,24 @@ if (isset($_SESSION['user'])) {
 a {
     color: black;
 }
-    .post {
-        padding: 10px;
-        background-color: grey;
-        text-align: center;
-        
-    }
-    .title {
-        background-color: white;
-        font-size: 2rem;
-        padding: 4px;
-        
-    }
-    .content {
-        background-color: white;
-    }
-    .buttons {
-        background-color: rgb(191, 188, 187);
-        padding: 1rem;
-        font-size: 2rem;
-    }
-    .buttons > * {
-  margin-right: 0.5rem;
-}
-.user {
-    font-size: 1rem;
-}
-    </style>
+</style>
 
-    </head>
+</head>
 
-    <body>
-<?php  if ($logged_in): ?>
-        <p>
-            <a href="post.php">Create a post</a>
-        </p>
-        <p>
-            <a href="log-out.php">Log out</a>
-            
-        </p>
-<?php  else: ?>
-    <p>
-        <a href="login.php">Log in</a>
-    </p>
+<body>
 
-    <p>
-        <a href="sign_up.php">Sign up</a>
-    </p>
-
-<?php endif ?>
-<?php
-$user = new User(); 
-
-$user->display_posts();
-?>
+<form action="search_action.php" method="post">
+    <div class="mb-3">
+            <label for="search" class="form-label">Search</label>
+            <input name="search" type="text" class="form-control" id="search">
+            <button type="submit">Search</button>
+        </div>
 
 <div class="navbar">
   <a href="index.html"><i class="fi fi-rr-home"></i></a>
-  <a href="search.php"><i class="fi fi-rr-search"></i></a>
+  <a href="#explore.php"><i class="fi fi-rr-search"></i></a>
   <a href="post.php"><i class="fi fi-rr-edit"></i></a> 
   <a href="#notifications.php"><i class="fi fi-rr-bell"></i></a>
   <a href="account.php"><i class="fi fi-rr-user"></i></a>
 </div>
-    </body>
-</html>
+

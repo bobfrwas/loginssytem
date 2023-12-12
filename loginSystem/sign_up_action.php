@@ -19,7 +19,7 @@ $email_check = $user->user_email_check($_POST['email']);
 if ($email_check == "email_unused"){
 
     $user->insert();
-    header("Location: sign_in.php");}
+    header("Location: login.php");}
 
 else {
     echo "Email in use";

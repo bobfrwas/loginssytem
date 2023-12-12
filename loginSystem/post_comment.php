@@ -22,5 +22,6 @@ $user = unserialize($_SESSION['user']);
 $user->post_comment($post_id, $content);
 
 
+
 header("Location: comments.php?post_id=" . $post_id);
 ?>
