@@ -15,7 +15,6 @@ if (isset($_SESSION['user'])) {
 
 <html>
     <head>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
     
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
         <style>
@@ -104,33 +103,24 @@ a {
 .user {
     font-size: 1rem;
 }
+.trending {
+    text-align: center;
+    font-size: 30px;
+    color: red;
+    font-weight: bold;
+}
     </style>
 
     </head>
 
     <body>
-<?php  if ($logged_in): ?>
-        <p>
-            <a href="post.php">Create a post</a>
-        </p>
-        <p>
-            <a href="log-out.php">Log out</a>
-            
-        </p>
-<?php  else: ?>
-    <p>
-        <a href="login.php">Log in</a>
-    </p>
 
-    <p>
-        <a href="sign_up.php">Sign up</a>
-    </p>
+<div class="trending"><h1>Trending posts</h1><div>
 
-<?php endif ?>
 <?php
 $user = new User(); 
 
-$user->display_posts();
+$user->display_favourite_posts();
 ?>
 
 <div class="navbar">
@@ -140,7 +130,6 @@ $user->display_posts();
   <a href="#notifications.php"><i class="fi fi-rr-bell"></i></a>
   <a href="account.php"><i class="fi fi-rr-user"></i></a>
   <a href="trending.php"><i class="fi fi-rr-fire-flame-curved"></i></a>
-  <a href="favourites.php"><i class="fi fi-rr-heart"></i></a>
 </div>
     </body>
 </html>
